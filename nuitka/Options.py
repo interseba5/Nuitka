@@ -57,6 +57,7 @@ from nuitka.utils.FileOperations import (
     openTextFile,
     resolveShellPatternToFilenames,
 )
+from nuitka.utils.InstalledPythons import findInstalledPython
 from nuitka.utils.StaticLibraries import getSystemStaticLibPythonPath
 from nuitka.utils.Utils import (
     getArchitecture,
@@ -870,6 +871,27 @@ to work."""
                 """\
 Error, to compile a package, specify its directory but, not the '__init__.py'."""
             )
+
+    if isOnefileMode():
+        zstandard_supported_pythons = ("3.5", "3.6", "3.7", "3.8", "3.9", "3.10")
+
+        compressor_python = findInstalledPython(
+            python_versions=zstandard_supported_pythons,
+            module_name="zstandard",
+            module_version="0.15",
+        )
+
+        if compressor_python is None:
+            if python_version < 0x350:
+                Tracing.general.warning(
+                    """\
+Onefile mode cannot compress without 'zstandard' module installed on another Python >= 3.5 on your system."""
+                )
+            else:
+                Tracing.general.warning(
+                    """\
+Onefile mode cannot compress without 'zstandard' module installed."""
+                )
 
 
 def isVerbose():
